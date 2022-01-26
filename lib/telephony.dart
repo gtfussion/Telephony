@@ -10,7 +10,7 @@ part 'constants.dart';
 part 'filter.dart';
 
 typedef MessageHandler(SmsMessage message);
-typedef SmsSendStatusListener(SendStatus status);
+typedef SmsSendStatusListener(SendStatus status, String number);
 
 void _flutterSmsSetupBackgroundChannel(
     {MethodChannel backgroundChannel =
@@ -51,7 +51,7 @@ void _flutterSmsSetupBackgroundChannel(
 class Telephony {
   final MethodChannel _foregroundChannel;
   final Platform _platform;
-
+  late String _number;
   late MessageHandler _onNewMessage;
   late MessageHandler _onBackgroundMessages;
   late SmsSendStatusListener _statusListener;
@@ -146,9 +146,9 @@ class Telephony {
         final message = call.arguments["message"];
         return _onNewMessage(SmsMessage.fromMap(message, INCOMING_SMS_COLUMNS));
       case SMS_SENT:
-        return _statusListener(SendStatus.SENT);
+        return _statusListener(SendStatus.SENT, _number);
       case SMS_DELIVERED:
-        return _statusListener(SendStatus.DELIVERED);
+        return _statusListener(SendStatus.DELIVERED, _number);
     }
   }
 
@@ -312,6 +312,8 @@ class Telephony {
       _statusListener = statusListener;
       listenStatus = true;
     }
+    _number = to;
+
     final Map<String, dynamic> args = {
       "address": to,
       "message_body": message,
