@@ -29,7 +29,7 @@ main() {
 
   group("should listen to", () {
     test("sms sent status", () async {
-      listener = (status) {
+      listener = (status,number) {
         expect(status, SendStatus.SENT);
       };
 
